@@ -1,0 +1,5 @@
+---
+title: Final Project
+author: Avery Watts
+output: pdf_document
+---
