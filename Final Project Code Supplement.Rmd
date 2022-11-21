@@ -33,7 +33,8 @@ insurance <- insurance[complete.cases(insurance),]
   #filter(charges < 10000)
 ```
 
-$log(y) = \beta_0 + log(\beta_1x_{age}) + \beta_2x_{sex} + log(\beta_3x_{bmi}) + \beta_4x_{smoker} + \beta_5x_{NWRegion} + $
+$\mu[MedicalCosts|age, sex, bmi, children, smoker, region] = \beta_0 + log(\beta_1x_{age}) + \beta_2x_{sex} + log(\beta_3x_{bmi}) + log(\beta_4x_{children}) + \beta_5x_{smoker} + \beta_6x_{NWRegion} + \beta_7x_{SERegion} + \beta_8x_{SWRegion}$
+
 ## Preliminary Model
 ```{r}
 prelim_model <- lm(log(charges) ~ log(age) + sex + log(bmi) + log(children + 1) + smoker + region, data = insurance)
@@ -45,18 +46,23 @@ ggpairs(insurance, columns = c("charges", "age", "sex", "bmi", "children",
 
 model_resid <- resid(prelim_model)
 
-histogram(insurance$charges, breaks = 100)
-# Constant error variance test: Signs of heteroscedasticity in some variables in model 1
+# Constant error variance test: Signs of heteroscedasticity in some variables,
+# log of age and fitted values plots showed patterns of wedging, which violates assumptions
 residualPlots(prelim_model, tests = FALSE, quadratic = FALSE)
 
-# Test of Normality: Normality is questionable given outliers, but acceptable for now
+# Test of Normality, The assumption was not met, we need more data with more 
+# explanatory variables
+histogram(insurance$charges, breaks = 100)
 gf_qq(~model_resid, ylab = "Residual", fig.height = 2.5, fig.width = 4) %>%
   gf_qqline(~model_resid)
 
-# Test of Multicollinearity
+# Test of Multicollinearity, everything is under 5, looks good
 vif(prelim_model)
 
-# View Influence of Outliers
+# Independence: We assume that the observations were selected independently and
+# randomly from the population.
+
+# View Influence of Outliers, outliers were flagged, will be removed
 infIndexPlot(prelim_model, vars = "cook")
 ```
 
@@ -66,9 +72,7 @@ infIndexPlot(prelim_model, vars = "cook")
 # Wald's test
 summary(prelim_model)
 
-
-# Measures of Association
-
+avPlots(prelim_model)
 ```
 
 
