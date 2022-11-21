@@ -1,0 +1,74 @@
+---
+title: "Final Project Code Supplement"
+author: "Kenta Hikino, Avery Watts, Rebecca Flowers"
+date: "2022-11-16"
+output: pdf_document
+---
+
+```{r setup, include=FALSE, warning=FALSE}
+# Load the required R packages in this setup chunk
+library(ggformula)
+library(car)
+library(dplyr)
+library(mosaic)
+library(GGally)
+library(effects)
+library(broom)
+library(rms)
+```
+
+## Initial Exploratory Data Analysis
+Theory: 
+
+Theoretical Model Equation:
+$logit(\pi) = \beta_0 + \beta_1x_{timesMoved} + \beta_2x_{drugsAtHome} - \beta_3x_{talkAtHome} - \beta_4x^2_{rulesAtHome}$
+
+```{r Data cleaning, warning=FALSE}
+# Load the data sets in the set up chunk
+insurance <- read.csv("~/stat230/insurance.csv")
+
+insurance <- insurance[complete.cases(insurance),]
+
+#insurance <- insurance %>%
+  #filter(charges < 10000)
+```
+
+$log(y) = \beta_0 + log(\beta_1x_{age}) + \beta_2x_{sex} + log(\beta_3x_{bmi}) + \beta_4x_{smoker} + \beta_5x_{NWRegion} + $
+## Preliminary Model
+```{r}
+prelim_model <- lm(log(charges) ~ log(age) + sex + log(bmi) + log(children + 1) + smoker + region, data = insurance)
+summary(prelim_model)
+
+# Visualize relationships
+ggpairs(insurance, columns = c("charges", "age", "sex", "bmi", "children", 
+                        "smoker", "region"))
+
+model_resid <- resid(prelim_model)
+
+histogram(insurance$charges, breaks = 100)
+# Constant error variance test: Signs of heteroscedasticity in some variables in model 1
+residualPlots(prelim_model, tests = FALSE, quadratic = FALSE)
+
+# Test of Normality: Normality is questionable given outliers, but acceptable for now
+gf_qq(~model_resid, ylab = "Residual", fig.height = 2.5, fig.width = 4) %>%
+  gf_qqline(~model_resid)
+
+# Test of Multicollinearity
+vif(prelim_model)
+
+# View Influence of Outliers
+infIndexPlot(prelim_model, vars = "cook")
+```
+
+
+## T-test, significance tests, and Final model Assessments
+```{r Model Analysis}
+# Wald's test
+summary(prelim_model)
+
+
+# Measures of Association
+
+```
+
+
